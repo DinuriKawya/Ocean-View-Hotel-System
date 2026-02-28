@@ -30,8 +30,10 @@ public class OceanviewHotel extends HttpServlet {
 		// TODO Auto-generated method stub
 		response.getWriter().append("Served at: ").append(request.getContextPath());
 		PrintWriter pw = response.getWriter();
-		pw.println("<H1>Hello!");
+		pw.println("<H1>Hello Kawya!");
 	}
+	
+	
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
