@@ -108,10 +108,10 @@
 <div class="wrapper">
     <aside>
         <h3>Staff Menu</h3>
-        <a href="#">&#128722; Reservations</a>
+        <a href="${pageContext.request.contextPath}/reservations">&#128722; Reservations</a>
         <a href="#">&#127963; Room Status</a>
-        <a href="#">&#128106; Guest Check-In</a>
-        <a href="#">&#128203; Guest Check-Out</a>
+        <a href="${pageContext.request.contextPath}/checkin">&#128100; Guest Check-In</a>
+        <a href="${pageContext.request.contextPath}/checkout">&#128198; Guest Check-Out</a>
         <a href="#">&#128205; Housekeeping</a>
         <a href="#">&#128222; Front Desk</a>
     </aside>

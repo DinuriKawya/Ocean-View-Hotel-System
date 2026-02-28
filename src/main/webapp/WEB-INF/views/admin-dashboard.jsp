@@ -112,20 +112,21 @@
     <aside>
         <!-- Staff operations (also visible to admin) -->
         <h3>Operations</h3>
-        <a href="#">&#128722; Reservations</a>
-        <a href="#">&#127963; Room Status</a>
-        <a href="#">&#128106; Check-In / Out</a>
-        <a href="#">&#128205; Housekeeping</a>
+        <a href="${pageContext.request.contextPath}/reservations">&#128722; Reservations</a>
+        <a href="${pageContext.request.contextPath}/rooms">&#127963; Room Status</a>
+        <a href="${pageContext.request.contextPath}/checkin">&#128100; Check-In</a>
+        <a href="${pageContext.request.contextPath}/checkout">&#128198; Check-Out</a>
 
         <!-- Admin-only section -->
         <div class="section">
             <h3>&#128274; Admin Only</h3>
-            <a href="#">&#128100; Manage Users</a>
-            <a href="#">&#128202; Reports &amp; Analytics</a>
-            <a href="#">&#128188; Room Management</a>
-            <a href="#">&#128179; Billing &amp; Revenue</a>
-            <a href="#">&#128196; Audit Logs</a>
-            <a href="#">&#9881; System Settings</a>
+            <a href="${pageContext.request.contextPath}/users">&#128100; Manage Users</a>
+            <a href="${pageContext.request.contextPath}/banks">&#127974; Bank Management</a>
+            <a href="${pageContext.request.contextPath}/reports">&#128202; Reports &amp; Analytics</a>
+            <a href="${pageContext.request.contextPath}/rooms">&#128188; Room Management</a>
+            <a href="${pageContext.request.contextPath}/billing">&#128179; Billing &amp; Revenue</a>
+            <a href="${pageContext.request.contextPath}/audit">&#128196; Audit Logs</a>
+            <a href="${pageContext.request.contextPath}/settings">&#9881; System Settings</a>
         </div>
     </aside>
 
@@ -157,7 +158,7 @@
                 <div class="icon">&#128202;</div>
                 <h4>Reports</h4>
             </div>
-            <div class="card admin-only">
+            <div class="card admin-only" onclick="location.href='${pageContext.request.contextPath}/billing'" style="cursor:pointer">
                 <div class="icon">&#128179;</div>
                 <h4>Billing</h4>
             </div>
@@ -165,7 +166,7 @@
                 <div class="icon">&#128196;</div>
                 <h4>Audit Logs</h4>
             </div>
-            <div class="card admin-only">
+            <div class="card admin-only" onclick="location.href='${pageContext.request.contextPath}/settings'" style="cursor:pointer">
                 <div class="icon">&#9881;</div>
                 <h4>Settings</h4>
             </div>

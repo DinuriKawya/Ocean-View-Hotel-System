@@ -146,7 +146,7 @@ public class Reservation {
                row("Check-Out",      checkOutDate != null ? checkOutDate.format(DATE_FMT) : "—") +
                row("Nights",         String.valueOf(getNights())) +
                "╠" + line + "╣\n" +
-               row("Total Amount",   String.format("PHP %.2f", totalAmount)) +
+               row("Total Amount",   String.format(AppSettings.getCurrency() + " %.2f", totalAmount)) +
                row("Booked By",      createdBy) +
                row("Date Booked",    createdAt != null ? createdAt.format(DATE_FMT) : "—") +
                (specialRequests != null && !specialRequests.isBlank()
@@ -166,7 +166,7 @@ public class Reservation {
                ", checkOut="  + checkOutDate  +
                ", nights="    + getNights()   +
                ", status="    + status        +
-               ", total=PHP " + String.format("%.2f", totalAmount) +
+               ", total=" + AppSettings.getCurrency() + " " + String.format("%.2f", totalAmount) +
                '}';
     }
 
