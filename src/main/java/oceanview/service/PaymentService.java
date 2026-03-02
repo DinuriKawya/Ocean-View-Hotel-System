@@ -6,6 +6,11 @@ import oceanview.dao.PaymentDAO;
 import oceanview.dao.ReservationDAO;
 import oceanview.model.*;
 import oceanview.model.AppSettings;
+import oceanview.strategy.BankTransferStrategy;
+import oceanview.strategy.CardPaymentStrategy;
+import oceanview.strategy.CashPaymentStrategy;
+import oceanview.strategy.PaymentContext;
+import oceanview.strategy.PaymentStrategy;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -83,24 +88,27 @@ public class PaymentService {
             if (res == null)
                 throw new PaymentException("Reservation #" + reservationId + " not found.");
             if (res.getStatus() != ReservationStatus.CHECKED_IN)
-                throw new PaymentException(
-                    "Check-out requires a CHECKED IN reservation. Current status: "
-                    + res.getStatus().getDisplayName());
+                throw new PaymentException("Check-out requires a CHECKED IN reservation. Current status: " + res.getStatus().getDisplayName());
 
             // Full bill = room charges + any extra charges saved in DB
             double extraTotal = extraChargeDAO.sumByReservationId(reservationId);
             double totalDue   = res.getTotalAmount() + extraTotal;
 
-            // Overpayment allowed at checkout (staff returns change)
+    
             validatePayments(payments, totalDue, true);
 
-            // Save checkout payments (if any)
+            // Save checkout payments 
             if (payments != null && !payments.isEmpty()) {
                 enrichBankNames(payments);
                 for (Payment p : payments) {
-                    p.setReservationId(reservationId);
-                    p.setCreatedBy(performedBy);
-                    paymentDAO.insert(p);
+                    PaymentStrategy strategy = switch (p.getMethod()) {
+                        case CASH -> new CashPaymentStrategy();
+                        case CARD -> new CardPaymentStrategy();
+                        case TRANSFER -> new BankTransferStrategy();
+                    };
+
+                    PaymentContext context = new PaymentContext(strategy);
+                    context.execute(p);
                 }
             }
 
@@ -108,7 +116,9 @@ public class PaymentService {
 
         } catch (SQLException e) {
             throw new PaymentException("Database error: " + e.getMessage());
-        }
+        } catch (Exception e) {
+			e.printStackTrace();
+		}
     }
 
     // -----------------------------------------------------------------------
