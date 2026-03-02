@@ -122,7 +122,7 @@ public class PaymentService {
     }
 
     // -----------------------------------------------------------------------
-    // Read
+    // Read Data
     // -----------------------------------------------------------------------
 
     public List<Payment> getPaymentsByReservation(int reservationId) throws PaymentException {
