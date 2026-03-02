@@ -26,6 +26,7 @@ public class SettingsServlet extends HttpServlet {
         if (!isAdmin(req, resp)) return;
 
         try {
+        	//mappers used collection type
             Map<String, String> settings = settingsService.getAll();
             req.setAttribute("settings", settings);
             String msg = req.getParameter("msg") != null ? req.getParameter("msg") : "";

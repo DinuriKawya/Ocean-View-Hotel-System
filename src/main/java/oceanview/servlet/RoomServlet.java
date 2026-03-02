@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import oceanview.Audit.AuditLogger;
 import oceanview.model.Room;
+import oceanview.model.RoomFactory;
 import oceanview.model.RoomStatus;
 import oceanview.model.RoomType;
 import oceanview.model.User;
@@ -14,16 +15,6 @@ import oceanview.service.RoomService.RoomException;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * GET  /rooms              → list all rooms (admin)
- * GET  /rooms?action=new   → create form
- * GET  /rooms?action=edit&id=X → edit form
- * GET  /rooms?action=json  → JSON array of all rooms (used by reservation form)
- *
- * POST /rooms  action=create → create
- * POST /rooms  action=update → update
- * POST /rooms  action=delete → delete (admin only)
- */
 @WebServlet("/rooms")
 public class RoomServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -63,7 +54,6 @@ public class RoomServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // Admin-only writes
         User user = currentUser(req);
         if (!user.isAdmin()) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN, "ADMIN role required.");
@@ -101,6 +91,8 @@ public class RoomServlet extends HttpServlet {
 
     private void handleNew(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        Room defaultRoom = RoomFactory.createRoom(RoomType.STANDARD); 
+        req.setAttribute("room",         defaultRoom);
         req.setAttribute("roomTypes",    RoomType.values());
         req.setAttribute("roomStatuses", RoomStatus.values());
         req.getRequestDispatcher("/WEB-INF/views/rooms/form.jsp").forward(req, resp);
@@ -115,7 +107,6 @@ public class RoomServlet extends HttpServlet {
         req.getRequestDispatcher("/WEB-INF/views/rooms/form.jsp").forward(req, resp);
     }
 
-    /** Returns all rooms as a JSON array — consumed by the reservation form. */
     private void handleJson(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, RoomException {
 
@@ -166,22 +157,19 @@ public class RoomServlet extends HttpServlet {
         r.setRoomId(id);
         roomService.updateRoom(r);
 
-        AuditLogger.log("UPDATE", "rooms", id,
-                user.getUsername(), ip, "Updated room " + r.getRoomNumber());
+        AuditLogger.log("UPDATE", "rooms", id, user.getUsername(), ip, "Updated room " + r.getRoomNumber());
 
         resp.sendRedirect(req.getContextPath() + "/rooms?msg=Room+updated+successfully.");
     }
 
-    private void handleDelete(HttpServletRequest req, HttpServletResponse resp,
-                              User user, String ip)
-            throws IOException, RoomException {
+    private void handleDelete(HttpServletRequest req, HttpServletResponse resp, User user, String ip) 
+     
+    	throws IOException, RoomException {
 
         int id = Integer.parseInt(req.getParameter("id"));
         roomService.deleteRoom(id);
 
-        AuditLogger.log("DELETE", "rooms", id,
-                user.getUsername(), ip, "Deleted room #" + id);
-
+        AuditLogger.log("DELETE", "rooms", id, user.getUsername(), ip, "Deleted room #" + id);
         resp.sendRedirect(req.getContextPath() + "/rooms?msg=Room+deleted.");
     }
 
@@ -190,14 +178,14 @@ public class RoomServlet extends HttpServlet {
     // -----------------------------------------------------------------------
 
     private Room buildFromForm(HttpServletRequest req) {
-        Room r = new Room();
-        r.setRoomNumber(Integer.parseInt(req.getParameter("roomNumber")));
-        r.setRoomType(RoomType.valueOf(req.getParameter("roomType")));
-        r.setPricePerNight(Double.parseDouble(req.getParameter("pricePerNight")));
-        r.setFloor(Integer.parseInt(req.getParameter("floor")));
-        r.setStatus(RoomStatus.valueOf(req.getParameter("status")));
-        r.setDescription(req.getParameter("description"));
-        return r;
+        return RoomFactory.createRoom(
+            Integer.parseInt(req.getParameter("roomNumber")),
+            RoomType.valueOf(req.getParameter("roomType")),
+            Double.parseDouble(req.getParameter("pricePerNight")),
+            Integer.parseInt(req.getParameter("floor")),
+            RoomStatus.valueOf(req.getParameter("status")),
+            req.getParameter("description")
+        );
     }
 
     private User currentUser(HttpServletRequest req) {
