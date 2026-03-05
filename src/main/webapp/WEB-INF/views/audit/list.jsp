@@ -17,7 +17,7 @@
     String fDateFrom    = (String) request.getAttribute("fDateFrom");
     String fDateTo      = (String) request.getAttribute("fDateTo");
     String fSearch      = (String) request.getAttribute("fSearch");
-
+      ///This is a test comment 
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MMM d, yyyy HH:mm:ss");
 %>
 <!DOCTYPE html>
@@ -54,7 +54,7 @@
 <body>
 
 <nav class="navbar topnav px-3">
-    <span class="navbar-brand text-white fw-semibold">OceanView Hotel &mdash; Admin</span>
+    <span class="navbar-brand text-white fw-semibold">OceanView Hotel &mdash; Admin Panel</span>
     <div class="d-flex align-items-center gap-3">
         <span class="text-white small">Welcome, <strong><%= currentUser.getFullName() %></strong>
             <span class="badge bg-danger ms-1"><%= currentUser.getRole() %></span></span>
@@ -73,7 +73,7 @@
         <div class="lbl mt-2">Admin</div>
         <a href="<%= ctx %>/users"        class="nav-link">&#128100; Users</a>
         <a href="<%= ctx %>/banks"        class="nav-link">&#127974; Banks</a>
-        <a href="<%= ctx %>/rooms"        class="nav-link">&#128188; Room Mgmt</a>
+        <a href="<%= ctx %>/rooms"        class="nav-link">&#128188; Room Manage</a>
         <a href="<%= ctx %>/audit"        class="nav-link active">&#128196; Audit Logs</a>
     </div>
 
