@@ -8,9 +8,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Three-tier role: BUSINESS LOGIC LAYER for Room management.
- */
+
 public class RoomService {
 
     private final RoomDAO dao = new RoomDAO();

@@ -11,7 +11,7 @@ import oceanview.service.BankService;
 import java.io.IOException;
 import java.util.Collections;
 
-/** Admin-only bank management. */
+
 @WebServlet("/banks")
 public class BankServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;

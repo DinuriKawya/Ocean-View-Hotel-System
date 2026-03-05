@@ -11,11 +11,6 @@ import oceanview.service.ReservationService.ReservationException;
 
 import java.io.IOException;
 
-/**
- * GET  /checkin          → search form
- * GET  /checkin?id=X     → load reservation, show confirmation form
- * POST /checkin          → confirm check-in (no payment collected here)
- */
 @WebServlet("/checkin")
 public class CheckInServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;

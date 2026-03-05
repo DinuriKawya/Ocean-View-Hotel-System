@@ -9,10 +9,7 @@ import oceanview.model.*;
 import java.sql.SQLException;
 import java.util.*;
 
-/**
- * Service layer for the Billing & Revenue module.
- * Delegates all SQL to BillingDAO / existing DAOs.
- */
+
 public class BillingService {
 
     private final BillingDAO     billingDAO     = new BillingDAO();
@@ -88,16 +85,10 @@ public class BillingService {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Folio (chronological ledger)
-    // ------------------------------------------------------------------
 
-    /**
-     * Returns the same data as getInvoice() — the JSP computes the
-     * running balance in a loop, so no extra processing is needed here.
-     */
+   
     public Map<String, Object> getFolio(int reservationId) throws BillingException {
-        return getInvoice(reservationId);   // same data, different view
+        return getInvoice(reservationId);   
     }
 
     // ------------------------------------------------------------------

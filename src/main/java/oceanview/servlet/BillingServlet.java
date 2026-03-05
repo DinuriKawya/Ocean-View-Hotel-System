@@ -10,14 +10,6 @@ import oceanview.service.BillingService.BillingException;
 import java.io.IOException;
 import java.util.Map;
 
-/**
- * Admin-only Billing & Revenue servlet.
- *
- * GET /billing                          → billing list  (action absent or "list")
- * GET /billing?action=dashboard         → revenue dashboard
- * GET /billing?action=invoice&id=X      → printable invoice
- * GET /billing?action=folio&id=X        → chronological folio
- */
 @WebServlet("/billing")
 public class BillingServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;

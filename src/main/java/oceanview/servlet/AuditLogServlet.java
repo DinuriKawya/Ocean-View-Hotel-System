@@ -10,12 +10,7 @@ import oceanview.service.AuditLogService;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Admin-only audit log viewer.
- *
- * GET /audit                      → first page, no filters
- * GET /audit?action=X&performedBy=Y&dateFrom=Z&dateTo=W&search=S&page=N
- */
+
 @WebServlet("/audit")
 public class AuditLogServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -62,7 +57,7 @@ public class AuditLogServlet extends HttpServlet {
             req.setAttribute("actions",     actions);
             req.setAttribute("performers",  performers);
 
-            // Echo filter params back so the form stays populated
+          
             req.setAttribute("fAction",      action      != null ? action      : "");
             req.setAttribute("fPerformedBy", performedBy != null ? performedBy : "");
             req.setAttribute("fDateFrom",    dateFrom    != null ? dateFrom    : "");

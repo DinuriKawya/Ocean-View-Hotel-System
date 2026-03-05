@@ -10,9 +10,7 @@ import oceanview.model.AppSettings;
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * Handles check-in and check-out payment processing.
- */
+
 public class PaymentService {
 
     private final PaymentDAO     paymentDAO     = new PaymentDAO();
@@ -20,11 +18,7 @@ public class PaymentService {
     private final BankDAO        bankDAO        = new BankDAO();
     private final ExtraChargeDAO extraChargeDAO = new ExtraChargeDAO();
 
-    // -----------------------------------------------------------------------
-    // Check-In: just confirm arrival — no payment collected at this stage.
-    // Payment is collected in full at check-out.
-    // -----------------------------------------------------------------------
-
+  
     public void checkIn(int reservationId, String performedBy) throws PaymentException {
         try {
             Reservation res = reservationDAO.findById(reservationId);
@@ -177,13 +171,11 @@ public class PaymentService {
 
         String c = AppSettings.getCurrency();
         if (allowOverpayment) {
-            // Checkout: overpayment is fine (staff gives change); underpayment is not
             if (totalEntered < totalDue - 0.01)
                 throw new PaymentException(String.format(
                     "Payment insufficient. " + c + " %,.2f still required (entered " + c + " %,.2f).",
                     totalDue - totalEntered, totalEntered));
         } else {
-            // Check-in: must match exactly
             if (Math.abs(totalEntered - totalDue) > 0.01)
                 throw new PaymentException(String.format(
                     "Payment total (" + c + " %,.2f) must equal the reservation total (" + c + " %,.2f).",

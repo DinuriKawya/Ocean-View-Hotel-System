@@ -14,14 +14,7 @@ import java.sql.SQLException;
 
 public class AuthService {
 
-    /**
-     * Attempts to log in a user.
-     *
-     * @param username plain-text username
-     * @param password plain-text password (will be SHA-256 hashed before comparison)
-     * @return the matching User if credentials are valid and account is ACTIVE
-     * @throws AuthException with a descriptive message on any failure
-     */
+    
     public User login(String username, String password) throws AuthException {
         if (username == null || username.isBlank() || password == null || password.isBlank()) {
             throw new AuthException("Username and password are required.");
@@ -85,9 +78,7 @@ public class AuthService {
         }
     }
 
-    // -----------------------------------------------------------------------
-    // Checked exception used by this service
-    // -----------------------------------------------------------------------
+
 
     public static class AuthException extends Exception {
         public AuthException(String message) { super(message); }

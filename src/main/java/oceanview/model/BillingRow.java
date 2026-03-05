@@ -2,10 +2,7 @@ package oceanview.model;
 
 import java.time.LocalDate;
 
-/**
- * View-model DTO for the billing list — computed from a joined query,
- * not a direct table mapping.
- */
+
 public class BillingRow {
 
     private int       reservationId;
@@ -13,7 +10,7 @@ public class BillingRow {
     private String    guestEmail;
     private String    guestPhone;
     private int       roomNumber;
-    private String    roomType;         // display name
+    private String    roomType;         
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
     private long      nights;
