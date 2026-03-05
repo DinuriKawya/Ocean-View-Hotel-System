@@ -13,18 +13,7 @@ import oceanview.service.UserService.UserException;
 import java.io.IOException;
 import java.util.Collections;
 
-/**
- * Admin-only user management.
- *
- * GET  /users                  → list all users
- * GET  /users?action=new       → new user form
- * GET  /users?action=edit&id=X → edit user form
- * POST /users action=create         → create user
- * POST /users action=update         → update full name + role
- * POST /users action=changePassword → change password
- * POST /users action=toggleStatus   → activate / deactivate
- * POST /users action=delete         → delete user
- */
+
 @WebServlet("/users")
 public class UserServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -149,7 +138,6 @@ public class UserServlet extends HttpServlet {
             }
 
         } catch (UserException e) {
-            // Re-show the appropriate form with the error
             try {
                 req.setAttribute("errorMessage", e.getMessage());
                 if ("create".equals(action)) {
@@ -176,7 +164,6 @@ public class UserServlet extends HttpServlet {
     // Helpers
     // -----------------------------------------------------------------------
 
-    /** Returns false and sends 403 if user is not admin. */
     private boolean requireAdmin(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         User u = currentUser(req);

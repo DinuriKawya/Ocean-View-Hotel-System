@@ -9,11 +9,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Admin-only settings management.
- * GET  /settings  → show settings form
- * POST /settings  → save settings, reload AppSettings, redirect with msg
- */
+
 public class SettingsServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;

@@ -14,13 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * GET  /checkout               → search form
- * GET  /checkout?id=X          → checkout form (add extra charges)
- * GET  /checkout?action=bill&id=X → bill preview page
- * POST /checkout action=generateBill → save new extra charges, redirect to bill
- * POST /checkout action=confirm     → save payments, complete check-out
- */
+
 @WebServlet("/checkout")
 public class CheckOutServlet extends HttpServlet {
 
@@ -59,7 +53,7 @@ public class CheckOutServlet extends HttpServlet {
             return;
         }
 
-        // -- Checkout form (with or without reservation) --
+    
         if (idParam == null || idParam.isBlank()) {
             req.getRequestDispatcher("/WEB-INF/views/checkout/form.jsp").forward(req, resp);
             return;
@@ -157,7 +151,7 @@ public class CheckOutServlet extends HttpServlet {
     }
 
     // -----------------------------------------------------------------------
-    // Status guard — throws if reservation is not CHECKED_IN
+    // Status 
     // -----------------------------------------------------------------------
 
     private void requireCheckedIn(int id) throws PaymentException {
@@ -190,7 +184,7 @@ public class CheckOutServlet extends HttpServlet {
     }
 
     // -----------------------------------------------------------------------
-    // Parse extra charge arrays: chargeType[], chargeDesc[], chargeAmount[]
+    // Parse extra charge arrays
     // -----------------------------------------------------------------------
 
     private List<ExtraCharge> parseExtraCharges(HttpServletRequest req) {
@@ -204,7 +198,7 @@ public class CheckOutServlet extends HttpServlet {
         for (int i = 0; i < types.length; i++) {
             String type = get(types, i);
             double amt  = parseDouble(amounts, i);
-            if (type == null || amt <= 0) continue;   // skip empty/invalid rows
+            if (type == null || amt <= 0) continue;   
 
             ExtraCharge ec = new ExtraCharge();
             ec.setChargeType(type);

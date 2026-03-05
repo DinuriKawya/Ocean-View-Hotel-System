@@ -16,20 +16,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Handles all Reservation CRUD operations.
- *
- * GET  /reservations              → list (search + filter)
- * GET  /reservations?action=new   → blank create form
- * GET  /reservations?action=edit&id=X → prefilled edit form
- * GET  /reservations?action=view&id=X → detail view
- *
- * POST /reservations  action=create → create new
- * POST /reservations  action=update → update existing
- * POST /reservations  action=cancel → cancel (STAFF + ADMIN)
- * POST /reservations  action=delete → hard delete (ADMIN only)
- * POST /reservations  action=status → change status (ADMIN only)
- */
 @WebServlet("/reservations")
 public class ReservationServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -38,7 +24,7 @@ public class ReservationServlet extends HttpServlet {
     private final RoomService        roomService = new RoomService();
 
     // -----------------------------------------------------------------------
-    // GET — read operations
+    // GET 
     // -----------------------------------------------------------------------
 
     @Override
@@ -63,7 +49,7 @@ public class ReservationServlet extends HttpServlet {
     }
 
     // -----------------------------------------------------------------------
-    // POST — write operations
+    // POST
     // -----------------------------------------------------------------------
 
     @Override
@@ -175,7 +161,6 @@ public class ReservationServlet extends HttpServlet {
 
         int id = Integer.parseInt(req.getParameter("reservationId"));
 
-        // Load existing to preserve status + createdBy
         Reservation existing = service.getById(id);
         Reservation updated  = buildFromForm(req);
         updated.setReservationId(id);
@@ -249,7 +234,7 @@ public class ReservationServlet extends HttpServlet {
     // Helpers
     // -----------------------------------------------------------------------
 
-    /** Parses the reservation form parameters into a Reservation object. */
+ 
     private Reservation buildFromForm(HttpServletRequest req) {
         Reservation r = new Reservation();
         r.setGuestName(req.getParameter("guestName"));

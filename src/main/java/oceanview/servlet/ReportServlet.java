@@ -9,14 +9,7 @@ import oceanview.service.ReportService;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Admin-only reports & analytics.
- *
- * GET /reports                                  → empty filter form
- * GET /reports?type=staff&dateFrom=X&dateTo=Y   → staff-wise report
- * GET /reports?type=room&dateFrom=X&dateTo=Y    → room category report
- * GET /reports?type=payment&dateFrom=X&dateTo=Y → payment method report
- */
+
 @WebServlet("/reports")
 public class ReportServlet extends HttpServlet {
 

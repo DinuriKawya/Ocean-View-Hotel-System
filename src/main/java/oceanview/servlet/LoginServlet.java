@@ -16,12 +16,11 @@ public class LoginServlet extends HttpServlet {
 
     private final AuthService authService = new AuthService();
 
-    // GET  /login  →  show login form
+    // GET
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // If already logged in, redirect to dashboard
         HttpSession session = req.getSession(false);
         if (session != null && session.getAttribute("loggedInUser") != null) {
             resp.sendRedirect(req.getContextPath() + "/dashboard");
@@ -31,7 +30,7 @@ public class LoginServlet extends HttpServlet {
         req.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(req, resp);
     }
 
-    // POST /login  →  validate credentials
+    // POST 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -43,13 +42,12 @@ public class LoginServlet extends HttpServlet {
         try {
             User user = authService.login(username, password);
 
-            // Invalidate old session, create a new one (session fixation protection)
             HttpSession oldSession = req.getSession(false);
             if (oldSession != null) oldSession.invalidate();
 
             HttpSession session = req.getSession(true);
             session.setAttribute("loggedInUser", user);
-            session.setMaxInactiveInterval(30 * 60); // 30 minutes
+            session.setMaxInactiveInterval(30 * 60); 
 
             AuditLogger.log("LOGIN", "users", user.getUserId(),
                     user.getUsername(), ip,
