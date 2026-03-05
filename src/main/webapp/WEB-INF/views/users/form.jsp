@@ -11,7 +11,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-    <title><%= isEdit ? "Edit User" : "New User" %> &mdash; OceanView Hotel</title>
+    <title><%= isEdit ? "Edit User" : "New User" %> &mdash; OceanView Hotel Resort</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background: #f0f4f8; }
