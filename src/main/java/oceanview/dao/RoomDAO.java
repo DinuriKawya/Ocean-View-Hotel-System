@@ -10,9 +10,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Three-tier role: DATA ACCESS LAYER — all SQL for the rooms table.
- */
+
 public class RoomDAO {
 
     // -----------------------------------------------------------------------
@@ -153,6 +151,7 @@ public class RoomDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, roomId);
             return ps.executeUpdate() > 0;
+        }
     }
 
     // -----------------------------------------------------------------------
