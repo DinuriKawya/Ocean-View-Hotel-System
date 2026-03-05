@@ -6,25 +6,103 @@ import oceanview.model.ReservationStatus;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
-/**
- * Three-tier role: BUSINESS LOGIC LAYER.
- * Validates input and enforces rules before touching the database.
- * Servlets call this — never the DAO directly.
- */
 public class ReservationService {
 
     private final ReservationDAO dao = new ReservationDAO();
 
     // -----------------------------------------------------------------------
-    // Create
+    // COLLECTION 1 — Queue
     // -----------------------------------------------------------------------
+    private final Queue<Reservation> reservationQueue = new LinkedList<>();
+
+    // -----------------------------------------------------------------------
+    // COLLECTION 2 — Set
+    // -----------------------------------------------------------------------
+    private final Set<String> reservationKeys = new HashSet<>();
+
+    // -----------------------------------------------------------------------
+    // COLLECTION 3 — Map
+    // -----------------------------------------------------------------------
+    private final Map<Integer, Reservation> reservationMap = new HashMap<>();
+
+
+    public void enqueueReservation(Reservation r) throws ReservationException {
+        String key = r.getRoomNumber() + "_" + r.getCheckInDate() + "_" + r.getCheckOutDate();
+
+        if (reservationKeys.contains(key)) {
+            throw new ReservationException(
+                "Room " + r.getRoomNumber() + " is already in the queue for those dates.");
+        }
+      
+        try {
+            if (dao.isRoomBooked(r.getRoomNumber(), r.getCheckInDate(), r.getCheckOutDate(), -1)) {
+                throw new ReservationException(
+                    "Room " + r.getRoomNumber() + " is already booked for those dates.");
+            }
+        } catch (SQLException e) {
+            throw new ReservationException("Database error: " + e.getMessage());
+        }
+
+        reservationQueue.add(r);   
+        reservationKeys.add(key);
+    }
+
+  
+    public Reservation processNextReservation(String createdByUsername)
+            throws ReservationException {
+
+        Reservation r = reservationQueue.poll();
+        if (r == null) {
+            throw new ReservationException("No reservations in the queue to process.");
+        }
+
+        r.setCreatedBy(createdByUsername);
+        r.setCreatedAt(LocalDate.now());
+        r.setStatus(ReservationStatus.PENDING);
+
+        try {
+            int id = dao.insert(r);
+            if (id < 0) throw new ReservationException("Failed to save reservation.");
+            r.setReservationId(id);
+
+            String key = r.getRoomNumber() + "_" + r.getCheckInDate() + "_" + r.getCheckOutDate();
+            reservationKeys.remove(key);
+
+            reservationMap.put(id, r); 
+            return r;
+
+        } catch (SQLException e) {
+            throw new ReservationException("Database error: " + e.getMessage());
+        }
+    }
+
+    public int getQueueSize() {
+        return reservationQueue.size();
+    }
 
     public Reservation createReservation(Reservation r, String createdByUsername)
             throws ReservationException {
 
         validate(r);
+
+        try {
+            if (dao.isRoomBooked(r.getRoomNumber(), r.getCheckInDate(), r.getCheckOutDate(), -1)) {
+                throw new ReservationException(
+                    "Room " + r.getRoomNumber() + " is already booked for those dates.");
+            }
+        } catch (ReservationException re) {
+            throw re;
+        } catch (SQLException e) {
+            throw new ReservationException("Database error: " + e.getMessage());
+        }
 
         r.setStatus(ReservationStatus.PENDING);
         r.setCreatedBy(createdByUsername);
@@ -34,6 +112,8 @@ public class ReservationService {
             int id = dao.insert(r);
             if (id < 0) throw new ReservationException("Failed to save reservation.");
             r.setReservationId(id);
+
+            reservationMap.put(id, r);
             return r;
         } catch (SQLException e) {
             throw new ReservationException("Database error: " + e.getMessage());
@@ -45,14 +125,19 @@ public class ReservationService {
     // -----------------------------------------------------------------------
 
     public Reservation getById(int id) throws ReservationException {
+        if (reservationMap.containsKey(id)) {
+            return reservationMap.get(id);
+        }
         try {
             Reservation r = dao.findById(id);
             if (r == null) throw new ReservationException("Reservation #" + id + " not found.");
+            reservationMap.put(id, r); 
             return r;
         } catch (SQLException e) {
             throw new ReservationException("Database error: " + e.getMessage());
         }
     }
+
 
     public List<Reservation> getAllReservations() throws ReservationException {
         try {
@@ -87,7 +172,6 @@ public class ReservationService {
     public Reservation updateReservation(Reservation r) throws ReservationException {
         validate(r);
 
-        // Cannot edit a cancelled or completed reservation
         if (r.getStatus() == ReservationStatus.CANCELLED ||
             r.getStatus() == ReservationStatus.CHECKED_OUT) {
             throw new ReservationException(
@@ -95,8 +179,21 @@ public class ReservationService {
         }
 
         try {
+            if (dao.isRoomBooked(r.getRoomNumber(), r.getCheckInDate(),
+                                 r.getCheckOutDate(), r.getReservationId())) {
+                throw new ReservationException(
+                    "Room " + r.getRoomNumber() + " is already booked for those dates.");
+            }
+        } catch (ReservationException re) {
+            throw re;
+        } catch (SQLException e) {
+            throw new ReservationException("Database error: " + e.getMessage());
+        }
+
+        try {
             if (!dao.update(r))
                 throw new ReservationException("Reservation #" + r.getReservationId() + " not found.");
+            reservationMap.put(r.getReservationId(), r); // keep cache in sync
             return r;
         } catch (SQLException e) {
             throw new ReservationException("Database error: " + e.getMessage());
@@ -108,6 +205,9 @@ public class ReservationService {
         try {
             if (!dao.updateStatus(reservationId, newStatus))
                 throw new ReservationException("Reservation #" + reservationId + " not found.");
+            if (reservationMap.containsKey(reservationId)) {
+                reservationMap.get(reservationId).setStatus(newStatus);
+            }
         } catch (SQLException e) {
             throw new ReservationException("Database error: " + e.getMessage());
         }
@@ -117,16 +217,15 @@ public class ReservationService {
     // Delete / Cancel
     // -----------------------------------------------------------------------
 
-    /** Staff cancel — sets status to CANCELLED (keeps record). */
     public void cancelReservation(int reservationId) throws ReservationException {
         changeStatus(reservationId, ReservationStatus.CANCELLED);
     }
 
-    /** Admin hard-delete — removes the row entirely. */
     public void deleteReservation(int reservationId) throws ReservationException {
         try {
             if (!dao.delete(reservationId))
                 throw new ReservationException("Reservation #" + reservationId + " not found.");
+            reservationMap.remove(reservationId);
         } catch (SQLException e) {
             throw new ReservationException("Database error: " + e.getMessage());
         }
