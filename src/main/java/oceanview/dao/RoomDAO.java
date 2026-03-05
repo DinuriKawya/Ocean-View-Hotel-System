@@ -153,7 +153,6 @@ public class RoomDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, roomId);
             return ps.executeUpdate() > 0;
-        }
     }
 
     // -----------------------------------------------------------------------
