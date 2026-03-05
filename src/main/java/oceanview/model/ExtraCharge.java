@@ -2,13 +2,13 @@ package oceanview.model;
 
 import java.time.LocalDateTime;
 
-/** Represents an extra charge added at checkout (damage, room service, etc.). */
+
 public class ExtraCharge {
 
     private int           chargeId;
     private int           reservationId;
-    private String        chargeType;    // e.g. "Damage/Breakage", "Room Service"
-    private String        description;  // optional note
+    private String        chargeType;    
+    private String        description;  
     private double        amount;
     private String        addedBy;
     private LocalDateTime createdAt;
@@ -34,7 +34,6 @@ public class ExtraCharge {
     public LocalDateTime getCreatedAt()            { return createdAt; }
     public void          setCreatedAt(LocalDateTime v) { this.createdAt = v; }
 
-    /** Display label: "Type — description" or just "Type" when no description. */
     public String getLabel() {
         if (description != null && !description.isBlank())
             return chargeType + " \u2014 " + description;

@@ -10,11 +10,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Three-tier role: DATA ACCESS LAYER.
- * All SQL for the reservations table lives here.
- * No business rules — only CRUD.
- */
+
 public class ReservationDAO {
 
     // -----------------------------------------------------------------------

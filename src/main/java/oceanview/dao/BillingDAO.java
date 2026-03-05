@@ -7,10 +7,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * SQL-only data access layer for billing queries.
- * No business logic — pure CRUD / aggregation.
- */
+
 public class BillingDAO {
 
     // ------------------------------------------------------------------
@@ -78,9 +75,7 @@ public class BillingDAO {
     // ------------------------------------------------------------------
     // KPI helpers
     // ------------------------------------------------------------------
-
-    /** Total payments received for the given period: "today", "month", or "year". */
-    public double getTotalRevenue(String period) throws SQLException {
+       public double getTotalRevenue(String period) throws SQLException {
         String where = periodClause(period, "created_at");
         String sql = "SELECT COALESCE(SUM(amount),0) FROM payments WHERE " + where;
         try (Connection conn = DBConnection.getConnection();
@@ -90,7 +85,6 @@ public class BillingDAO {
         }
     }
 
-    /** Number of checked-out reservations for the given period (uses check_out_date). */
     public int getCheckoutCount(String period) throws SQLException {
         String where = periodClause(period, "check_out_date") + " AND status='CHECKED_OUT'";
         String sql = "SELECT COUNT(*) FROM reservations WHERE " + where;
@@ -105,7 +99,6 @@ public class BillingDAO {
     // Chart data
     // ------------------------------------------------------------------
 
-    /** Revenue by payment method — current month. Returns [method, total]. */
     public List<String[]> getRevenueByMethod() throws SQLException {
         String sql = """
             SELECT method, COALESCE(SUM(amount),0) AS total FROM payments
@@ -115,7 +108,7 @@ public class BillingDAO {
         return queryStringArrays(sql, 2);
     }
 
-    /** Revenue by room type — current year. Returns [room_type, grand_revenue]. */
+    
     public List<String[]> getRevenueByRoomType() throws SQLException {
         String sql = """
             SELECT r.room_type,
@@ -130,7 +123,7 @@ public class BillingDAO {
         return queryStringArrays(sql, 2);
     }
 
-    /** Daily revenue for the last N days. Returns [date_label, amount]. */
+ 
     public List<String[]> getDailyRevenue(int days) throws SQLException {
         String sql = """
             SELECT DATE(created_at) AS day, COALESCE(SUM(amount),0) AS revenue
@@ -151,7 +144,7 @@ public class BillingDAO {
         return list;
     }
 
-    /** Recent payments. Returns [date, guest_name, method, amount]. */
+  
     public List<String[]> getRecentPayments(int limit) throws SQLException {
         String sql = """
             SELECT DATE(p.created_at), r.guest_name, p.method, p.amount
@@ -203,7 +196,7 @@ public class BillingDAO {
         return b;
     }
 
-    /** Returns a period WHERE clause for the given timestamp column. */
+  
     private String periodClause(String period, String col) {
         return switch (period != null ? period : "month") {
             case "today" -> "DATE(" + col + ") = CURDATE()";
