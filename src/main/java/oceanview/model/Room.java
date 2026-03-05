@@ -1,9 +1,5 @@
 package oceanview.model;
 
-/**
- * Represents a physical hotel room.
- * Three-tier role: MODEL (entity layer).
- */
 public class Room {
 
     private int        roomId;
@@ -27,27 +23,67 @@ public class Room {
         this.description   = description;
     }
 
-    // Getters
-    public int        getRoomId()        { return roomId; }
-    public int        getRoomNumber()    { return roomNumber; }
-    public RoomType   getRoomType()      { return roomType; }
-    public double     getPricePerNight() { return pricePerNight; }
-    public RoomStatus getStatus()        { return status; }
-    public int        getFloor()         { return floor; }
-    public String     getDescription()   { return description; }
+ // Getters
+    public int getRoomId() {
+        return roomId;
+    }
+
+    public int getRoomNumber() {
+        return roomNumber;
+    }
+
+    public RoomType getRoomType() {
+        return roomType;
+    }
+
+    public double getPricePerNight() {
+        return pricePerNight;
+    }
+
+    public RoomStatus getStatus() {
+        return status;
+    }
+
+    public int getFloor() {
+        return floor;
+    }
+
+    public String getDescription() {
+        return description;
+    }
 
     // Setters
-    public void setRoomId(int roomId)               { this.roomId        = roomId; }
-    public void setRoomNumber(int roomNumber)        { this.roomNumber    = roomNumber; }
-    public void setRoomType(RoomType roomType)       { this.roomType      = roomType; }
-    public void setPricePerNight(double price)       { this.pricePerNight = price; }
-    public void setStatus(RoomStatus status)         { this.status        = status; }
-    public void setFloor(int floor)                  { this.floor         = floor; }
-    public void setDescription(String description)   { this.description   = description; }
+    public void setRoomId(int roomId) {
+        this.roomId = roomId;
+    }
+
+    public void setRoomNumber(int roomNumber) {
+        this.roomNumber = roomNumber;
+    }
+
+    public void setRoomType(RoomType roomType) {
+        this.roomType = roomType;
+    }
+
+    public void setPricePerNight(double pricePerNight) {
+        this.pricePerNight = pricePerNight;
+    }
+
+    public void setStatus(RoomStatus status) {
+        this.status = status;
+    }
+
+    public void setFloor(int floor) {
+        this.floor = floor;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public boolean isAvailable() { return RoomStatus.AVAILABLE == this.status; }
 
-    /** Label shown in dropdowns: "101 — Standard Room | Floor 1 | LKR 3,000/night" */
+    
     public String getDropdownLabel() {
         return String.format("Room %d — %s | Floor %d | %s %,.2f/night",
                 roomNumber,
