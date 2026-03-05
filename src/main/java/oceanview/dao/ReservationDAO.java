@@ -10,11 +10,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Three-tier role: DATA ACCESS LAYER.
- * All SQL for the reservations table lives here.
- * No business rules — only CRUD.
- */
+
 public class ReservationDAO {
 
     // -----------------------------------------------------------------------
@@ -57,7 +53,7 @@ public class ReservationDAO {
     }
 
     // -----------------------------------------------------------------------
-    // READ — single
+    // READ 
     // -----------------------------------------------------------------------
 
     public Reservation findById(int id) throws SQLException {
@@ -77,12 +73,12 @@ public class ReservationDAO {
     // -----------------------------------------------------------------------
 
     public List<Reservation> findAll() throws SQLException {
-        String sql = "SELECT * FROM reservations ORDER BY check_in_date DESC";
+        String sql = "SELECT * FROM reservations ORDER BY created_at ASC, reservation_id ASC";
         return queryList(sql);
     }
 
     public List<Reservation> findByStatus(ReservationStatus status) throws SQLException {
-        String sql = "SELECT * FROM reservations WHERE status = ? ORDER BY check_in_date";
+        String sql = "SELECT * FROM reservations WHERE status = ? ORDER BY created_at ASC, reservation_id ASC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -93,13 +89,38 @@ public class ReservationDAO {
     }
 
     public List<Reservation> findByGuestName(String name) throws SQLException {
-        String sql = "SELECT * FROM reservations WHERE guest_name LIKE ? ORDER BY check_in_date DESC";
+        String sql = "SELECT * FROM reservations WHERE guest_name LIKE ? ORDER BY created_at ASC, reservation_id ASC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, "%" + name + "%");
             return toList(ps.executeQuery());
+        }
+    }
+
+ 
+    public boolean isRoomBooked(int roomNumber, LocalDate checkIn, LocalDate checkOut,
+                                int excludeId) throws SQLException {
+        String sql = """
+                SELECT COUNT(*) FROM reservations
+                WHERE room_number   = ?
+                  AND check_in_date  < ?
+                  AND check_out_date > ?
+                  AND status NOT IN ('CANCELLED', 'CHECKED_OUT')
+                  AND reservation_id <> ?
+                """;
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1,    roomNumber);
+            ps.setDate(2,   Date.valueOf(checkOut));   
+            ps.setDate(3,   Date.valueOf(checkIn));    
+            ps.setInt(4,    excludeId);               
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next() && rs.getInt(1) > 0;
         }
     }
 
@@ -182,7 +203,6 @@ public class ReservationDAO {
         return list;
     }
 
-    /** Maps a ResultSet row to a Reservation object. */
     private Reservation map(ResultSet rs) throws SQLException {
         Reservation r = new Reservation();
         r.setReservationId(rs.getInt("reservation_id"));

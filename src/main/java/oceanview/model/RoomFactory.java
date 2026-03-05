@@ -1,31 +1,28 @@
 package oceanview.model;
 
+import oceanview.factory.DeluxeRoom;
+import oceanview.factory.FamilyRoom;
+import oceanview.factory.PenthouseRoom;
+import oceanview.factory.StandardRoom;
+import oceanview.factory.SuiteRoom;
+
 
 public class RoomFactory {
 
-  
+    // Factory method
     public static Room createRoom(RoomType type) {
-        Room room = new Room();
-        room.setRoomType(type);
-        room.setStatus(RoomStatus.AVAILABLE);  
-
-       
-        switch (type) {
-            case STANDARD   -> { room.setPricePerNight(3000); room.setFloor(1); }
-            case DELUXE     -> { room.setPricePerNight(5500); room.setFloor(2); }
-            case SUITE      -> { room.setPricePerNight(9000); room.setFloor(3); }
-            case FAMILY     -> { room.setPricePerNight(7000); room.setFloor(2); }
-            case PENTHOUSE  -> { room.setPricePerNight(20000); room.setFloor(6); }
-            default         -> throw new IllegalArgumentException("Unknown room type: " + type);
-        }
-        return room;
+        return switch (type) {
+            case STANDARD  -> new StandardRoom();
+            case DELUXE    -> new DeluxeRoom();
+            case SUITE     -> new SuiteRoom();      
+            case FAMILY    -> new FamilyRoom();      
+            case PENTHOUSE -> new PenthouseRoom();    
+        };
     }
 
- 
     public static Room createRoom(int roomNumber, RoomType type, double price, int floor, RoomStatus status, String description) {
-        Room room = new Room();
+        Room room = createRoom(type);
         room.setRoomNumber(roomNumber);
-        room.setRoomType(type);
         room.setPricePerNight(price);
         room.setFloor(floor);
         room.setStatus(status);
