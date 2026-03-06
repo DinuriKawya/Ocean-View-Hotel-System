@@ -1,4 +1,4 @@
-# OceanView Hotel Management System
+# OceanView Hotel Management System Overview
 
 A full-featured hotel management web application built with Java Servlets, JSP, and MySQL. Designed for hotel staff and administrators to manage reservations, rooms, billing, payments, and operations from a single dashboard.
 
