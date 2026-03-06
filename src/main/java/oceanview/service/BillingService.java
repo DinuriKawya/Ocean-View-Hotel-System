@@ -9,22 +9,37 @@ import oceanview.model.*;
 import java.sql.SQLException;
 import java.util.*;
 
-
 public class BillingService {
 
-    private final BillingDAO     billingDAO     = new BillingDAO();
-    private final ReservationDAO reservationDAO = new ReservationDAO();
-    private final PaymentDAO     paymentDAO     = new PaymentDAO();
-    private final ExtraChargeDAO extraChargeDAO = new ExtraChargeDAO();
+    private final BillingDAO     billingDAO;
+    private final ReservationDAO reservationDAO;
+    private final PaymentDAO     paymentDAO;
+    private final ExtraChargeDAO extraChargeDAO;
+
+  
+    public BillingService() {
+        this.billingDAO     = new BillingDAO();
+        this.reservationDAO = new ReservationDAO();
+        this.paymentDAO     = new PaymentDAO();
+        this.extraChargeDAO = new ExtraChargeDAO();
+    }
+
+  
+    public BillingService(BillingDAO billingDAO, ReservationDAO reservationDAO,
+                          PaymentDAO paymentDAO, ExtraChargeDAO extraChargeDAO) {
+        this.billingDAO     = billingDAO;
+        this.reservationDAO = reservationDAO;
+        this.paymentDAO     = paymentDAO;
+        this.extraChargeDAO = extraChargeDAO;
+    }
 
     // ------------------------------------------------------------------
     // Billing list
     // ------------------------------------------------------------------
 
-    public List<BillingRow> getBillingList(String search,
-                                           String dateFrom,
-                                           String dateTo,
-                                           String status) throws BillingException {
+    public List<BillingRow> getBillingList(String search, String dateFrom,
+                                           String dateTo, String status)
+            throws BillingException {
         try {
             return billingDAO.findBillingRows(search, dateFrom, dateTo, status);
         } catch (SQLException e) {
@@ -85,10 +100,8 @@ public class BillingService {
         }
     }
 
-
-   
     public Map<String, Object> getFolio(int reservationId) throws BillingException {
-        return getInvoice(reservationId);   
+        return getInvoice(reservationId);
     }
 
     // ------------------------------------------------------------------

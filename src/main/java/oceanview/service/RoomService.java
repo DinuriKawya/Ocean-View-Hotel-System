@@ -11,7 +11,15 @@ import java.util.List;
 
 public class RoomService {
 
-    private final RoomDAO dao = new RoomDAO();
+	private final RoomDAO dao;
+
+	public RoomService() { 
+		this.dao = new RoomDAO();
+	}
+	
+	public RoomService(RoomDAO dao) {
+		this.dao = dao;
+	}
 
     // -----------------------------------------------------------------------
     // Read

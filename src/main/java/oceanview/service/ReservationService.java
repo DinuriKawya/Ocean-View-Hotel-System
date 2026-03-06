@@ -3,19 +3,27 @@ package oceanview.service;
 import oceanview.dao.ReservationDAO;
 import oceanview.model.Reservation;
 import oceanview.model.ReservationStatus;
+import oceanview.FilterPattern.Criteria;
+import oceanview.FilterPattern.AndCriteria;
+import oceanview.FilterPattern.NotCriteria;
+import oceanview.FilterPattern.CriteriaByGuestName;
+import oceanview.FilterPattern.CriteriaByStatus;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Three-tier role: BUSINESS LOGIC LAYER.
- * Validates input and enforces rules before touching the database.
- * Servlets call this — never the DAO directly.
- */
 public class ReservationService {
 
-    private final ReservationDAO dao = new ReservationDAO();
+    private final ReservationDAO dao;
+
+    public ReservationService() {
+    	this.dao = new ReservationDAO();
+    }
+ 
+    public ReservationService(ReservationDAO dao) { 
+    	this.dao = dao;
+    }
 
     // -----------------------------------------------------------------------
     // Create
@@ -40,6 +48,7 @@ public class ReservationService {
         }
     }
 
+    
     // -----------------------------------------------------------------------
     // Read
     // -----------------------------------------------------------------------
@@ -66,7 +75,9 @@ public class ReservationService {
         if (name == null || name.isBlank())
             throw new ReservationException("Guest name cannot be empty.");
         try {
-            return dao.findByGuestName(name.trim());
+            List<Reservation> all = dao.findAll();
+            Criteria criteria = new CriteriaByGuestName(name.trim());
+            return criteria.meetCriteria(all);
         } catch (SQLException e) {
             throw new ReservationException("Database error: " + e.getMessage());
         }
@@ -74,7 +85,23 @@ public class ReservationService {
 
     public List<Reservation> getByStatus(ReservationStatus status) throws ReservationException {
         try {
-            return dao.findByStatus(status);
+            List<Reservation> all = dao.findAll();
+            Criteria criteria = new CriteriaByStatus(status);
+            return criteria.meetCriteria(all);
+        } catch (SQLException e) {
+            throw new ReservationException("Database error: " + e.getMessage());
+        }
+    }
+
+    public List<Reservation> searchActiveByGuestName(String name) throws ReservationException {
+        if (name == null || name.isBlank())
+            throw new ReservationException("Guest name cannot be empty.");
+        try {
+            List<Reservation> all = dao.findAll();
+            Criteria nameCriteria      = new CriteriaByGuestName(name.trim());
+            Criteria cancelledCriteria = new CriteriaByStatus(ReservationStatus.CANCELLED);
+            Criteria activeAndNamed    = new AndCriteria(nameCriteria, new NotCriteria(cancelledCriteria));
+            return activeAndNamed.meetCriteria(all);
         } catch (SQLException e) {
             throw new ReservationException("Database error: " + e.getMessage());
         }
@@ -87,7 +114,6 @@ public class ReservationService {
     public Reservation updateReservation(Reservation r) throws ReservationException {
         validate(r);
 
-        // Cannot edit a cancelled or completed reservation
         if (r.getStatus() == ReservationStatus.CANCELLED ||
             r.getStatus() == ReservationStatus.CHECKED_OUT) {
             throw new ReservationException(
@@ -103,26 +129,54 @@ public class ReservationService {
         }
     }
 
+//    public void changeStatus(int reservationId, ReservationStatus newStatus)
+//            throws ReservationException {
+//        try {
+//            if (!dao.updateStatus(reservationId, newStatus))
+//                throw new ReservationException("Reservation #" + reservationId + " not found.");
+//        } catch (SQLException e) {
+//            throw new ReservationException("Database error: " + e.getMessage());
+//        }
+//    }
+//
+//    // -----------------------------------------------------------------------
+//    // Delete / Cancel
+//    // -----------------------------------------------------------------------
+//
+//    public void cancelReservation(int reservationId) throws ReservationException {
+//        changeStatus(reservationId, ReservationStatus.CANCELLED);
+//    }
+    
+ // ── UPDATED: sends CONFIRMED email when admin changes status ──
     public void changeStatus(int reservationId, ReservationStatus newStatus)
             throws ReservationException {
         try {
             if (!dao.updateStatus(reservationId, newStatus))
                 throw new ReservationException("Reservation #" + reservationId + " not found.");
+
+            // Send confirmation email when status becomes CONFIRMED
+            if (newStatus == ReservationStatus.CONFIRMED) {
+                Reservation r = getById(reservationId);
+                EmailService.getInstance().sendConfirmationEmail(r);
+            }
+
         } catch (SQLException e) {
             throw new ReservationException("Database error: " + e.getMessage());
         }
     }
 
-    // -----------------------------------------------------------------------
-    // Delete / Cancel
-    // -----------------------------------------------------------------------
-
-    /** Staff cancel — sets status to CANCELLED (keeps record). */
+    // ── UPDATED: loads reservation first, cancels, then sends email ──
     public void cancelReservation(int reservationId) throws ReservationException {
+        // Step 1: load BEFORE cancelling so we have the guest email
+        Reservation r = getById(reservationId);
+
+        // Step 2: set status to CANCELLED in DB
         changeStatus(reservationId, ReservationStatus.CANCELLED);
+
+        // Step 3: send email — never throws, failure is just logged
+        EmailService.getInstance().sendCancellationEmail(r);
     }
 
-    /** Admin hard-delete — removes the row entirely. */
     public void deleteReservation(int reservationId) throws ReservationException {
         try {
             if (!dao.delete(reservationId))

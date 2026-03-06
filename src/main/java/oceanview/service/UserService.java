@@ -12,13 +12,17 @@ import java.util.List;
 
 public class UserService {
 
-    private final UserDAO userDAO = new UserDAO();
+	private final UserDAO userDAO;
 
-    // -----------------------------------------------------------------------
-    // Read
-    // -----------------------------------------------------------------------
+	public UserService() {
+	    this.userDAO = new UserDAO();
+	}
 
-    public List<User> getAllUsers() throws UserException {
+	public UserService(UserDAO userDAO) {
+	    this.userDAO = userDAO;
+	}
+
+	public List<User> getAllUsers() throws UserException {
         try { return userDAO.findAll(); }
         catch (SQLException e) { throw new UserException("Database error: " + e.getMessage()); }
     }

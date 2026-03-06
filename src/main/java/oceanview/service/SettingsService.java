@@ -8,7 +8,16 @@ import java.util.Map;
 
 public class SettingsService {
 
-    private final SettingsDAO settingsDAO = new SettingsDAO();
+    private final SettingsDAO settingsDAO;
+
+
+    public SettingsService() { 
+    	this.settingsDAO = new SettingsDAO(); 
+    }
+
+    public SettingsService(SettingsDAO settingsDAO) { 
+    	this.settingsDAO = settingsDAO;
+    }
 
     public Map<String, String> getAll() throws SettingsException {
         try {

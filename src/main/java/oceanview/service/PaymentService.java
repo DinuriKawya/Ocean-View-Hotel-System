@@ -6,19 +6,43 @@ import oceanview.dao.PaymentDAO;
 import oceanview.dao.ReservationDAO;
 import oceanview.model.*;
 import oceanview.model.AppSettings;
+import oceanview.strategy.BankTransferStrategy;
+import oceanview.strategy.CardPaymentStrategy;
+import oceanview.strategy.CashPaymentStrategy;
+import oceanview.strategy.PaymentContext;
+import oceanview.strategy.PaymentStrategy;
 
 import java.sql.SQLException;
 import java.util.List;
 
-
 public class PaymentService {
 
-    private final PaymentDAO     paymentDAO     = new PaymentDAO();
-    private final ReservationDAO reservationDAO = new ReservationDAO();
-    private final BankDAO        bankDAO        = new BankDAO();
-    private final ExtraChargeDAO extraChargeDAO = new ExtraChargeDAO();
+    private final PaymentDAO     paymentDAO;
+    private final ReservationDAO reservationDAO;
+    private final BankDAO        bankDAO;
+    private final ExtraChargeDAO extraChargeDAO;
 
   
+    public PaymentService() {
+        this.paymentDAO     = new PaymentDAO();
+        this.reservationDAO = new ReservationDAO();
+        this.bankDAO        = new BankDAO();
+        this.extraChargeDAO = new ExtraChargeDAO();
+    }
+
+    public PaymentService(PaymentDAO paymentDAO, ReservationDAO reservationDAO,
+                          BankDAO bankDAO, ExtraChargeDAO extraChargeDAO)
+    {
+        this.paymentDAO     = paymentDAO;
+        this.reservationDAO = reservationDAO;
+        this.bankDAO        = bankDAO;
+        this.extraChargeDAO = extraChargeDAO;
+    }
+
+    // -----------------------------------------------------------------------
+    // Check In
+    // -----------------------------------------------------------------------
+
     public void checkIn(int reservationId, String performedBy) throws PaymentException {
         try {
             Reservation res = reservationDAO.findById(reservationId);
@@ -37,7 +61,7 @@ public class PaymentService {
     }
 
     // -----------------------------------------------------------------------
-    // Checkout step 1: save extra charges to DB (called on Generate Bill)
+    // Checkout step 1: save extra charges
     // -----------------------------------------------------------------------
 
     public void saveExtraCharges(int reservationId, List<ExtraCharge> charges, String performedBy)
@@ -65,8 +89,7 @@ public class PaymentService {
     }
 
     // -----------------------------------------------------------------------
-    // Checkout step 2: collect payment for extra charges + update status
-    // Extra charges are already saved in DB at this point.
+    // Checkout step 2: process checkout
     // -----------------------------------------------------------------------
 
     public void processCheckOut(int reservationId, List<Payment> payments, String performedBy)
@@ -77,24 +100,24 @@ public class PaymentService {
             if (res == null)
                 throw new PaymentException("Reservation #" + reservationId + " not found.");
             if (res.getStatus() != ReservationStatus.CHECKED_IN)
-                throw new PaymentException(
-                    "Check-out requires a CHECKED IN reservation. Current status: "
-                    + res.getStatus().getDisplayName());
+                throw new PaymentException("Check-out requires a CHECKED IN reservation. Current status: "
+                        + res.getStatus().getDisplayName());
 
-            // Full bill = room charges + any extra charges saved in DB
             double extraTotal = extraChargeDAO.sumByReservationId(reservationId);
             double totalDue   = res.getTotalAmount() + extraTotal;
 
-            // Overpayment allowed at checkout (staff returns change)
             validatePayments(payments, totalDue, true);
 
-            // Save checkout payments (if any)
             if (payments != null && !payments.isEmpty()) {
                 enrichBankNames(payments);
                 for (Payment p : payments) {
-                    p.setReservationId(reservationId);
-                    p.setCreatedBy(performedBy);
-                    paymentDAO.insert(p);
+                    PaymentStrategy strategy = switch (p.getMethod()) {
+                        case CASH     -> new CashPaymentStrategy();
+                        case CARD     -> new CardPaymentStrategy();
+                        case TRANSFER -> new BankTransferStrategy();
+                    };
+                    PaymentContext context = new PaymentContext(strategy);
+                    context.execute(p);
                 }
             }
 
@@ -102,11 +125,13 @@ public class PaymentService {
 
         } catch (SQLException e) {
             throw new PaymentException("Database error: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     // -----------------------------------------------------------------------
-    // Read
+    // Read Data
     // -----------------------------------------------------------------------
 
     public List<Payment> getPaymentsByReservation(int reservationId) throws PaymentException {
@@ -133,13 +158,8 @@ public class PaymentService {
     // Validation helpers
     // -----------------------------------------------------------------------
 
-    /**
-     * @param allowOverpayment true for checkout (cash change is fine);
-     *                         false for check-in (must match exactly).
-     */
     private void validatePayments(List<Payment> payments, double totalDue,
-                                  boolean allowOverpayment)
-            throws PaymentException {
+                                  boolean allowOverpayment) throws PaymentException {
 
         if (payments == null || payments.isEmpty())
             throw new PaymentException("At least one payment method is required.");

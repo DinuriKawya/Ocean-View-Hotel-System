@@ -1,15 +1,14 @@
 package oceanview.factory;
 
 import oceanview.model.RoomStatus;
-import oceanview.model.RoomType;
 
 public class FamilyRoom extends AbstractRoom {
 
     @Override
     protected void configureRoom() {
-        setRoomType(RoomType.FAMILY);
-        setPricePerNight(7000);
-        setFloor(2);
-        setStatus(RoomStatus.AVAILABLE);
+        room.setPricePerNight(7000);
+        room.setFloor(2);
+        room.setStatus(RoomStatus.AVAILABLE);
+        room.setDescription("Family Room");
     }
 }

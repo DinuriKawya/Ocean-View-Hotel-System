@@ -8,7 +8,16 @@ import java.util.List;
 
 public class BankService {
 
-    private final BankDAO dao = new BankDAO();
+    private final BankDAO dao;
+
+    public BankService() { 
+    	this.dao = new BankDAO();
+    }
+
+
+    public BankService(BankDAO dao) {
+    	this.dao = dao;
+    }
 
     public List<Bank> getAllBanks() throws BankException {
         try { return dao.findAll(); }

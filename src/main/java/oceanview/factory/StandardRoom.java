@@ -1,15 +1,14 @@
 package oceanview.factory;
 
 import oceanview.model.RoomStatus;
-import oceanview.model.RoomType;
 
 public class StandardRoom extends AbstractRoom {
 
     @Override
     protected void configureRoom() {
-        setRoomType(RoomType.STANDARD);
-        setPricePerNight(3000);
-        setFloor(1);
-        setStatus(RoomStatus.AVAILABLE);
+        room.setPricePerNight(3500);
+        room.setFloor(1);
+        room.setStatus(RoomStatus.AVAILABLE);
+        room.setDescription("Suite Room");
     }
 }

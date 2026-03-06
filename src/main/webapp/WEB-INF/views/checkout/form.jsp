@@ -296,7 +296,7 @@
             tr.innerHTML =
                 '<td><span class="badge bg-warning text-dark" style="font-size:.75rem">' + escHtml(type) + '</span></td>' +
                 '<td class="small">' + (desc ? escHtml(desc) : '<span class="text-muted">—</span>') + '</td>' +
-                '<td class="text-end text-danger fw-semibold">currencyCode + ' ' + amt.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</td>' +
+                '<td class="text-end text-danger fw-semibold">' + currencyCode + ' ' + amt.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</td>' +
                 '<td class="text-center">' +
                   '<button type="button" class="btn btn-outline-danger btn-sm py-0 px-1" onclick="removeCharge(' + rn + ')" title="Remove">&#x2715;</button>' +
                 '</td>';

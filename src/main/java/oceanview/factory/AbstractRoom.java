@@ -2,11 +2,13 @@ package oceanview.factory;
 
 import oceanview.model.Room;
 
+public abstract class AbstractRoom {
 
-public abstract class AbstractRoom extends Room {
+    protected Room room;  
 
     public AbstractRoom() {
-        configureRoom();   
+        this.room = new Room();
+        configureRoom();
     }
 
     protected abstract void configureRoom();

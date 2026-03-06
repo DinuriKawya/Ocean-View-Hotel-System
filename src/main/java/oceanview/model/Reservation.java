@@ -4,12 +4,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
-/**
- * Represents a hotel reservation.
- *
- * Three-tier role: MODEL (data structure / entity layer).
- * This class holds no business logic and no database code.
- */
 public class Reservation {
 
     // -----------------------------------------------------------------------
@@ -28,7 +22,7 @@ public class Reservation {
     private double            totalAmount;
     private ReservationStatus status;
     private String            specialRequests;
-    private String            createdBy;       // username of staff who booked
+    private String            createdBy;       
     private LocalDate         createdAt;
 
     // -----------------------------------------------------------------------
@@ -60,9 +54,6 @@ public class Reservation {
         this.createdAt      = createdAt;
     }
 
-    // -----------------------------------------------------------------------
-    // Derived / computed helpers (no setters — calculated from other fields)
-    // -----------------------------------------------------------------------
 
     /** Number of nights between check-in and check-out. */
     public long getNights() {
@@ -115,18 +106,7 @@ public class Reservation {
     private static final DateTimeFormatter DATE_FMT =
             DateTimeFormatter.ofPattern("MMM dd, yyyy");
 
-    /**
-     * Human-readable summary — use for receipts, logs, console output.
-     *
-     * Example:
-     * ╔══════════════════════════════════════════════════╗
-     * ║         OCEANVIEW HOTEL — RESERVATION            ║
-     * ╠══════════════════════════════════════════════════╣
-     * ║ Reservation #  : 1001                           ║
-     * ║ Status         : Confirmed                      ║
-     * ║ Guest          : Juan Dela Cruz                 ║
-     * ...
-     */
+   
     public String toFormattedString() {
         String line = "═".repeat(50);
         return "\n╔" + line + "╗\n" +
@@ -154,7 +134,7 @@ public class Reservation {
                "╚" + line + "╝\n";
     }
 
-    /** Standard toString — compact, good for logging. */
+   
     @Override
     public String toString() {
         return "Reservation{" +

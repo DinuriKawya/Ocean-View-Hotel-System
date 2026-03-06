@@ -90,11 +90,18 @@ public class ReservationServlet extends HttpServlet {
 
         String search       = req.getParameter("search");
         String statusFilter = req.getParameter("status");
+        String activeOnly   = req.getParameter("activeOnly");  
 
         List<Reservation> list;
-        if (search != null && !search.isBlank()) {
+
+        if (search != null && !search.isBlank() && activeOnly != null) {
+            // AND combination: name matches + not cancelled
+            list = service.searchActiveByGuestName(search.trim());
+        } else if (search != null && !search.isBlank()) {
+            // Criteria: by guest name
             list = service.searchByGuestName(search.trim());
         } else if (statusFilter != null && !statusFilter.isBlank()) {
+            // Criteria: by status
             list = service.getByStatus(ReservationStatus.valueOf(statusFilter));
         } else {
             list = service.getAllReservations();

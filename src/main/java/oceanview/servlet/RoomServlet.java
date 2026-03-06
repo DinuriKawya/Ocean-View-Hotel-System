@@ -1,5 +1,4 @@
 package oceanview.servlet;
-import oceanview.factory.RoomFactory;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -90,8 +89,8 @@ public class RoomServlet extends HttpServlet {
 
     private void handleNew(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        Room defaultRoom = RoomFactory.createRoom(RoomType.STANDARD); 
-        req.setAttribute("room",         defaultRoom);
+//        Room defaultRoom = RoomFactory.createRoom(RoomType.STANDARD); 
+//        req.setAttribute("room",         defaultRoom);
         req.setAttribute("roomTypes",    RoomType.values());
         req.setAttribute("roomStatuses", RoomStatus.values());
         req.getRequestDispatcher("/WEB-INF/views/rooms/form.jsp").forward(req, resp);
@@ -138,11 +137,11 @@ public class RoomServlet extends HttpServlet {
                               User user, String ip)
             throws IOException, RoomException, ServletException {
 
-        Room r = buildFromForm(req);
-        roomService.createRoom(r);
-
-        AuditLogger.log("CREATE", "rooms", r.getRoomId(),
-                user.getUsername(), ip, "Created room " + r.getRoomNumber());
+//        Room r = buildFromForm(req);
+//        roomService.createRoom(r);
+//
+//        AuditLogger.log("CREATE", "rooms", r.getRoomId(),
+//                user.getUsername(), ip, "Created room " + r.getRoomNumber());
 
         resp.sendRedirect(req.getContextPath() + "/rooms?msg=Room+created+successfully.");
     }
@@ -152,11 +151,11 @@ public class RoomServlet extends HttpServlet {
             throws IOException, RoomException, ServletException {
 
         int id = Integer.parseInt(req.getParameter("roomId"));
-        Room r = buildFromForm(req);
-        r.setRoomId(id);
-        roomService.updateRoom(r);
+//        Room r = buildFromForm(req);
+//        r.setRoomId(id);
+//        roomService.updateRoom(r);
 
-        AuditLogger.log("UPDATE", "rooms", id, user.getUsername(), ip, "Updated room " + r.getRoomNumber());
+//        AuditLogger.log("UPDATE", "rooms", id, user.getUsername(), ip, "Updated room " + r.getRoomNumber());
 
         resp.sendRedirect(req.getContextPath() + "/rooms?msg=Room+updated+successfully.");
     }
@@ -175,16 +174,16 @@ public class RoomServlet extends HttpServlet {
     // -----------------------------------------------------------------------
     // -----------------------------------------------------------------------
 
-    private Room buildFromForm(HttpServletRequest req) {
-        return RoomFactory.createRoom(
-            Integer.parseInt(req.getParameter("roomNumber")),
-            RoomType.valueOf(req.getParameter("roomType")),
-            Double.parseDouble(req.getParameter("pricePerNight")),
-            Integer.parseInt(req.getParameter("floor")),
-            RoomStatus.valueOf(req.getParameter("status")),
-            req.getParameter("description")
-        );
-    }
+//    private Room buildFromForm(HttpServletRequest req) {
+//        return RoomFactory.createRoom(
+//            Integer.parseInt(req.getParameter("roomNumber")),
+//            RoomType.valueOf(req.getParameter("roomType")),
+//            Double.parseDouble(req.getParameter("pricePerNight")),
+//            Integer.parseInt(req.getParameter("floor")),
+//            RoomStatus.valueOf(req.getParameter("status")),
+//            req.getParameter("description")
+//        );
+//    }
 
     private User currentUser(HttpServletRequest req) {
         return (User) req.getSession(false).getAttribute("loggedInUser");

@@ -170,6 +170,10 @@
                 <div class="icon">&#9881;</div>
                 <h4>Settings</h4>
             </div>
+            <div class="card" onclick="location.href='${pageContext.request.contextPath}/help'" style="cursor:pointer">
+			    <div class="icon">&#10067;</div>
+			    <h4>Help Center</h4>
+			</div>
         </div>
     </main>
 </div>
