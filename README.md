@@ -9,30 +9,85 @@ A full-featured hotel management web application built with Java Servlets, JSP, 
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
+- [Arhcitecture](#architecture)
 - [Database Setup](#database-setup)
 - [Configuration](#configuration)
 - [Running the Application](#running-the-application)
 - [Default Login Credentials](#default-login-credentials)
 - [Module Overview](#module-overview)
 - [Role-Based Access](#role-based-access)
+- [Email Configuration](#email-configuration)
+- [Design Patterns](#design-patterns)
 - [Screenshots](#screenshots)
 
 ---
 
 ## Features
 
-- **Authentication** — Secure login/logout with session management
-- **Role-Based Access** — Admin and Staff roles with separate permissions
-- **Reservations** — Full CRUD: create, view, edit, cancel reservations with status tracking
-- **Room Management** — Manage room inventory with types, pricing, and availability
-- **Check-In / Check-Out** — Process guest arrivals and departures with extra charges
-- **Billing** — Generate invoices, folios, and a revenue dashboard
-- **Payments** — Multi-method payments (Cash, Card, Bank Transfer) per reservation
-- **Reports** — Staff performance, room occupancy, and payment reports with PDF/Excel export
-- **Banks** — Manage bank list used in payment dropdowns
-- **User Management** — Admin can create/edit/deactivate system users
-- **Audit Logs** — Full action trail with filtering by user, action, and date
-- **System Settings** — Configure hotel name, currency, address, phone, and tax rate from the UI
+### 🔐 Authentication & Security
+- Secure login/logout with HTTP session management
+- SHA-256 password hashing stored in the database
+- `AuthFilter` servlet filter that guards all routes and redirects unauthenticated users to `/login`
+- Role-based permissions enforced at the servlet level
+
+### 👥 Role-Based Access Control
+- Two roles: **Admin** and **Staff**
+- Admins have full access to all modules
+- Staff are restricted from sensitive administrative features (rooms, users, audit, settings)
+
+### 📅 Reservations
+- Full CRUD: create, view, edit, and cancel reservations
+- Status lifecycle: `PENDING → CONFIRMED → CHECKED_IN → CHECKED_OUT / CANCELLED / NO_SHOW`
+- Fields include guest name, email, phone, room assignment, dates, guest count, and special requests
+- Date validation enforced at both DB constraint and service layer
+
+### 🛏️ Room Management
+- Manage room inventory: number, type, floor, pricing, and description
+- Room types: `STANDARD`, `DELUXE`, `SUITE`, `FAMILY`, `PENTHOUSE`
+- Room statuses: `AVAILABLE`, `OCCUPIED`, `MAINTENANCE`, `OUT_OF_ORDER`
+- Prevents assigning rooms that are not available
+
+### ✅ Check-In / Check-Out
+- One-click check-in for confirmed reservations
+- Check-out wizard to finalize the stay, review charges, and generate the final bill
+- Extra charges (room service, minibar, etc.) can be added during checkout
+
+### 💰 Billing
+- Generate detailed invoices and folios per reservation
+- Revenue dashboard with summary statistics
+- Tax rate configurable from the Settings panel and automatically applied to invoices
+
+### 💳 Payments
+- Multi-method payment support: **Cash**, **Card**, **Bank Transfer**
+- Card payments capture last 4 digits of card
+- Bank transfers link to a managed bank list and capture a reference number
+- Multiple partial payments supported per reservation
+- Comments field for payment notes
+
+### 📊 Reports
+- Staff performance reports
+- Room occupancy reports
+- Payment summary reports
+- Export to **PDF** and **Excel** formats
+
+### 🏦 Banks
+- Manage the list of banks available in payment method dropdowns
+- Activate/deactivate banks without deleting them
+
+### 👤 User Management *(Admin only)*
+- Create, edit, and deactivate system user accounts
+- Assign roles (Admin / Staff)
+- Prevents deletion of active users to preserve audit integrity
+
+### 🗂️ Audit Logs *(Admin only)*
+- Full action trail of all system events (create, update, delete, login, logout)
+- Stores action type, table name, record ID, performing user, and IP address
+- Filterable by user, action type, and date range
+- Indexed for fast querying
+
+### ⚙️ System Settings *(Admin only)*
+- Configure hotel name, address, phone, currency, and tax rate from the UI
+- Settings are stored in the `system_settings` table and loaded at application startup via `SettingsListener`
 
 ---
 
@@ -54,42 +109,66 @@ A full-featured hotel management web application built with Java Servlets, JSP, 
 
 ```
 oceanview/
-├── src/
-│   └── main/
-│       ├── java/oceanview/
-│       │   ├── Audit/              # AuditLogger utility
-│       │   ├── database/           # DBConnection (JDBC)
-│       │   ├── filter/             # AuthFilter (session guard)
-│       │   ├── listener/           # SettingsListener (app startup)
-│       │   ├── model/              # Entity classes (User, Reservation, Room, ...)
-│       │   ├── dao/                # Data Access Objects (SQL queries)
-│       │   ├── service/            # Business logic layer
-│       │   └── servlet/            # HTTP request handlers
-│       └── webapp/
-│           ├── index.jsp           # Redirects to /login
-│           └── WEB-INF/
-│               ├── web.xml         # Servlet, filter & listener config
-│               ├── lib/            # mysql-connector-j JAR
-│               ├── sql/            # Database setup scripts
-│               └── views/          # JSP views organized by feature
-│                   ├── login.jsp
-│                   ├── admin-dashboard.jsp
-│                   ├── staff-dashboard.jsp
-│                   ├── reservations/
-│                   ├── rooms/
-│                   ├── checkin/
-│                   ├── checkout/
-│                   ├── billing/
-│                   ├── banks/
-│                   ├── users/
-│                   ├── audit/
-│                   ├── reports/
-│                   └── settings/
-└── build/
-    └── classes/                    # Compiled bytecode (git-ignored)
-```
+├── build/                          # Compiled bytecode (git-ignored)
+└── src/
+    └── main/
+        ├── java/oceanview/
+        │   ├── Audit/              # AuditLogger — append-only action trail for all state changes
+        │   ├── dao/                # Data Access Objects — all SQL via PreparedStatement
+        │   ├── database/           # DBConnection — JDBC connection singleton/factory
+        │   ├── factory/            # Factory pattern — object creation abstraction
+        │   ├── filter/             # AuthFilter — Jakarta EE servlet filter, session guard
+        │   ├── FilterPattern/      # Additional filter pattern implementations
+        │   ├── listener/           # SettingsListener — loads system_settings at app startup
+        │   ├── model/              # POJO entity classes (User, Reservation, Room, Payment, ...)
+        │   ├── service/            # Business logic and validation layer
+        │   ├── servlet/            # HTTP request handlers (one Front Controller per module)
+        │   ├── strategy/           # Strategy pattern — swappable business logic (e.g. payment methods)
+        │   ├── test/               # Unit / integration tests
+        │   └── email.properties    # Email configuration properties
+        └── webapp/
+            ├── META-INF/
+            └── WEB-INF/
+                ├── lib/            # mysql-connector-j JAR (bundled)
+                ├── sql/            # Database creation and seed scripts
+                └── views/          # JSP views, organized by feature module
+                    ├── audit/
+                    ├── banks/
+                    ├── billing/
+                    ├── checkin/
+                    ├── checkout/
+                    ├── billing/
+                    ├── banks/
+                    ├── users/
+                    ├── audit/
+                    ├── reports/
+                    └── settings/
 
 ---
+## 🏗 Architecture
+
+The application follows a strict **3-tier layered architecture**:
+
+```
+Browser
+  │
+  ▼
+AuthFilter           ← Validates session; redirects to /login if unauthenticated
+  │
+  ▼
+Servlet              ← Handles HTTP request/response, validates role, delegates to Service
+  │
+  ▼
+Service              ← Business logic, input validation, orchestrates DAO calls
+  │
+  ▼
+DAO                  ← Executes SQL using PreparedStatement, maps ResultSet → Model
+  │
+  ▼
+MySQL Database       ← Persistent data store
+
+Servlet ──(sets request attributes)──► JSP View ──► HTML Response to Browser
+```
 
 ## Database Setup
 
@@ -362,6 +441,57 @@ Request → AuthFilter → Servlet → Service → DAO → MySQL
 - **JSP** — Renders HTML using data set as request attributes by the servlet
 
 ---
+
+
+## Email Configuration
+
+Email credentials are kept in a gitignored email.properties file for security. Use email.properties.example as a template. You must use a Gmail App Password if using Gmail SMTP.
+
+## Design Patterns
+
+PatternApplied ToPurposeFilter PatternReservation filteringFilters reservations by criteria such as guest name, status, and dateSingleton PatternAuthenticationEnsures a single shared session/connection instance is used across the entire applicationStrategy PatternPayment methodsSwappable payment processing logic — Cash, Card, and Bank Transfer each have their own strategyDAO PatternEntire projectAll database access is handled through dedicated Data Access Objects, keeping SQL isolated from business logicFactory PatternRoom typesCreates the correct room object (Standard, Deluxe, Suite, Family, Penthouse) based on the selected type
+
+##Screenshots
+
+ADMIN DASHBOARD
+<img width="1902" height="837" alt="image" src="https://github.com/user-attachments/assets/4d98bd9b-dbc9-4147-b9ef-54b5410ee26b" />
+
+MANAGE RESERVATION
+<img width="1896" height="893" alt="image" src="https://github.com/user-attachments/assets/e8bd37f5-eaf2-485e-b002-0bdecc392c3b" />
+
+MANAGE ROOM
+<img width="1883" height="909" alt="image" src="https://github.com/user-attachments/assets/53c64dab-a738-4490-ad3c-b8809a91295d" />
+
+GUEST CHECKIN
+<img width="1911" height="819" alt="image" src="https://github.com/user-attachments/assets/052aab04-86bf-40ae-8dab-6bf4a567accf" />
+
+GUEST CHECKOUT
+<img width="1916" height="793" alt="image" src="https://github.com/user-attachments/assets/cb059f58-23e5-4a0c-8ba6-4a72f20b9a65" />
+
+ADD EXTRA CHARGES
+<img width="1599" height="465" alt="image" src="https://github.com/user-attachments/assets/32545f20-2ed0-4940-880b-1cb413ad0133" />
+
+VIEW AUDIT LOGS
+<img width="1901" height="918" alt="image" src="https://github.com/user-attachments/assets/008dce74-a564-4068-a117-5639aed9d1c6" />
+
+MANAGE SYSTEM SETTINGS
+<img width="1903" height="911" alt="image" src="https://github.com/user-attachments/assets/3dce9b95-a1e1-42e3-aff9-acd199836b5c" />
+
+MANAGE BANKS
+<img width="1909" height="902" alt="image" src="https://github.com/user-attachments/assets/ac0192cb-9374-4486-8859-8405ddc9eb9f" />
+
+VIEW BILLINGS
+<img width="1893" height="921" alt="image" src="https://github.com/user-attachments/assets/c01490db-3fd5-4648-b1e5-5385455e3529" />
+
+MONTHLY REVENUE DASHBOARD
+<img width="1904" height="905" alt="image" src="https://github.com/user-attachments/assets/90d588f3-a25f-4165-999c-b2161329ff74" />
+
+VIEW AND GENERATE REPORTS
+<img width="1914" height="882" alt="image" src="https://github.com/user-attachments/assets/094dba45-a188-40b0-916f-3dc692b24f38" />
+
+STAFF DASHBOARD
+<img width="1886" height="569" alt="image" src="https://github.com/user-attachments/assets/1eff2b70-245b-4dd8-9cc0-b9b39dc87204" />
+
 
 ## License
 
