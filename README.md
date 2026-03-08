@@ -145,31 +145,6 @@ oceanview/
                     └── settings/
 
 ---
-## 🏗 Architecture
-
-The application follows a strict **3-tier layered architecture**:
-
-```
-Browser
-  │
-  ▼
-AuthFilter           ← Validates session; redirects to /login if unauthenticated
-  │
-  ▼
-Servlet              ← Handles HTTP request/response, validates role, delegates to Service
-  │
-  ▼
-Service              ← Business logic, input validation, orchestrates DAO calls
-  │
-  ▼
-DAO                  ← Executes SQL using PreparedStatement, maps ResultSet → Model
-  │
-  ▼
-MySQL Database       ← Persistent data store
-
-Servlet ──(sets request attributes)──► JSP View ──► HTML Response to Browser
-```
-
 ## Database Setup
 
 ### 1. Create the database
@@ -426,7 +401,7 @@ These are stored in the `system_settings` table and loaded at startup by `Settin
 
 ## Architecture
 
-The application follows a strict **3-tier MVC architecture**:
+The application follows a strict **3-tier Layered architecture**:
 
 ```
 Request → AuthFilter → Servlet → Service → DAO → MySQL
@@ -446,6 +421,9 @@ Request → AuthFilter → Servlet → Service → DAO → MySQL
 ## Email Configuration
 
 Email credentials are kept in a gitignored email.properties file for security. Use email.properties.example as a template. You must use a Gmail App Password if using Gmail SMTP.
+
+<img width="1890" height="822" alt="image" src="https://github.com/user-attachments/assets/1b5cd160-00cf-4ad9-b633-63a2d5d3f7a1" />
+
 
 ## Design Patterns
 
