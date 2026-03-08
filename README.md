@@ -451,7 +451,7 @@ Email credentials are kept in a gitignored email.properties file for security. U
 
 PatternApplied ToPurposeFilter PatternReservation filteringFilters reservations by criteria such as guest name, status, and dateSingleton PatternAuthenticationEnsures a single shared session/connection instance is used across the entire applicationStrategy PatternPayment methodsSwappable payment processing logic — Cash, Card, and Bank Transfer each have their own strategyDAO PatternEntire projectAll database access is handled through dedicated Data Access Objects, keeping SQL isolated from business logicFactory PatternRoom typesCreates the correct room object (Standard, Deluxe, Suite, Family, Penthouse) based on the selected type
 
-##Screenshots
+## Screenshots
 
 ADMIN DASHBOARD
 <img width="1902" height="837" alt="image" src="https://github.com/user-attachments/assets/4d98bd9b-dbc9-4147-b9ef-54b5410ee26b" />
