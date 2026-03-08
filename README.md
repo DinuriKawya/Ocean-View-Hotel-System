@@ -467,6 +467,12 @@ MONTHLY REVENUE DASHBOARD
 VIEW AND GENERATE REPORTS
 <img width="1914" height="882" alt="image" src="https://github.com/user-attachments/assets/094dba45-a188-40b0-916f-3dc692b24f38" />
 
+PRINT BILL
+<img width="1673" height="967" alt="image" src="https://github.com/user-attachments/assets/cc1b9b96-1d0b-4e49-a587-0ee45d576804" />
+
+HELP CENTER
+<img width="1894" height="933" alt="image" src="https://github.com/user-attachments/assets/43f90860-dd4d-41e1-b957-b16fe01f516c" />
+
 STAFF DASHBOARD
 <img width="1886" height="569" alt="image" src="https://github.com/user-attachments/assets/1eff2b70-245b-4dd8-9cc0-b9b39dc87204" />
 
